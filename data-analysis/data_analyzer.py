@@ -16,11 +16,15 @@ import matplotlib.pyplot as plt
 DATA_FILE = "board-game-data/bgg_db_1806.csv"
 OUTPUT = "data-analysis/analysis.csv"
 
-def plot(narray, name, save=True, close=True, intervals="auto"):
+def plot(narray, name, save=True, close=True, intervals="auto", legend=False):
     hist, bins = np.histogram(narray, bins=intervals)
     width = 0.7 * (bins[1] - bins[0])
     center = (bins[:-1] + bins[1:]) / 2
     plt.bar(center, hist, align='center', width=width)
+    plt.xlabel(name.capitalize())
+    plt.ylabel("Frequency")
+    if legend:
+        plt.legend(legend)
     if save:
         plt.savefig(f"data-analysis/img/{name}")
     if close:
@@ -42,5 +46,5 @@ plot(data["num_votes"], name="num_votes", intervals="sqrt")
 plot(data["owned"], name="owned", intervals="sqrt")
 
 # plot combined graph
-plot(data["avg_rating"], name=None, save=False, close=False)
-plot(data["geek_rating"], name="Rating-vs-GRating", save=True, close=True)
+plot(data["avg_rating"], name="", save=False, close=False)
+plot(data["geek_rating"], name="Rating-vs-GRating", save=True, close=True, legend=["Avg_rating", "Geek_rating"])
