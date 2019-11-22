@@ -14,7 +14,10 @@ import matplotlib.pyplot as plt
 # 16 - owned
 
 DATA_FILE = "board-game-data/bgg_db_1806.csv"
-OUTPUT = "data-analysis/analysis.csv"
+DIR = "data-analysis/"
+NUM_STATS = DIR + "num_analysis.csv"
+CAT_STATS = DIR + "cat_analysis.csv"
+CAT_COUNT = DIR + "cat_count.csv"
 
 def plot(narray, name, save=True, close=True, intervals="auto", legend=False):
     hist, bins = np.histogram(narray, bins=intervals)
@@ -35,8 +38,29 @@ data = pd.read_csv(DATA_FILE)
 # data.info()
 
 # save basic statistics
-cols = ["avg_rating", "geek_rating", "num_votes", "owned"]
-data[cols].describe().to_csv(OUTPUT)
+cols = ["avg_rating", "geek_rating", "num_votes", "owned", "min_players", "max_players", "avg_time", "min_time", "max_time"]
+data[cols].describe().transpose().to_csv(NUM_STATS)
+
+
+cols = ["mechanic", "category", "designer"]
+data[cols].describe(include=np.object).transpose().to_csv(CAT_STATS)
+
+# TODO refactor this
+df_cat = []
+for row in data['category']:
+    entry = []
+    for cat in row.replace('/',',').split(','):
+        entry.append([cat.strip().lower().replace('\'s',''), 1])
+    df_cat.extend(entry)
+df_cat = pd.DataFrame(df_cat, columns=['category', 'count'])
+print("Unique categories:",df_cat['category'].nunique())
+print(df_cat["category"].describe(include=np.object))
+cat_count = df_cat.category.apply(lambda x: pd.value_counts(x)).sum(axis = 0)
+cat_count = cat_count.sort_values(ascending=False)
+cat_count.plot.bar()
+plt.savefig("data-analysis/img/category")
+cat_count.to_csv(CAT_COUNT)
+
 
 # Plot
 # plot individual graphs
