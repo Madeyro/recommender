@@ -3,6 +3,8 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sns
+sns.set_style('dark')
 
 # rank, bgg_url, game_id, names, min_players, max_players, avg_time, min_time,
 # max_time, year, avg_rating, geek_rating, num_votes, image_url, age, mechanic,
@@ -20,6 +22,14 @@ CAT_COUNT = STATS_DIR + "cat_count.csv"
 def main():
     # read from file to pandas
     data = pd.read_csv(DATA_FILE)
+
+    # plot correlation graphs
+    plot_corr(data, 'avg_rating', 'num_votes', 'avg_rating-to-num_votes')
+    plot_corr(data, 'avg_rating', 'owned', 'avg_rating-to-owned')
+    plot_corr(data, 'geek_rating', 'num_votes', 'geek_rating-to-num_votes')
+    plot_corr(data, 'geek_rating', 'owned', 'geek_rating-to-owned')
+
+    return
 
     # save basic statistics
     cols = ['avg_rating', 'geek_rating', 'num_votes', 'owned', 'min_players',
@@ -84,6 +94,15 @@ def plot_series(series, name, save=True):
     if save:
         plt.tight_layout()
         plt.savefig(f'{IMG_DIR}{name}', dpi=200)
+        plt.clf()
+
+
+def plot_corr(data, x_name, y_name, name, save=True):
+    plt.figure(figsize=(8, 6))
+    plt.rcParams['patch.force_edgecolor'] = True
+    sns.jointplot(x=x_name, y=y_name, data=data, alpha=0.4)
+    if save:
+        plt.savefig(f"{IMG_DIR}{name}", dpi=200)
         plt.clf()
 
 
