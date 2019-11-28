@@ -33,14 +33,30 @@ def standardize_text(df, col_name, replace=True):
     """
     standard = []
     for row in df[col_name]:
-        entry = []
+        entry = set()
         for word in row.replace('/', ',').split(','):
-            entry.append(word.strip().lower().replace('\'s', ''))
+            entry.add(word.strip().lower().replace('\'s', ''))
         standard.append(entry)
-    # standard = pd.DataFrame(standard, columns=[col_name, 'count'])
+
     if replace:
         df[col_name] = standard
         return df
     else:
         new_df = df.copy()
+        new_df[col_name] = standard
         return new_df
+
+
+def dice_coeff(x, y):
+    """Computes the Dice coefficient for similarity of two sets
+
+    x, y -- can be sets or lists
+
+    Returns boolean value True or False
+    """
+    x = x.iloc[0]
+    y = y.iloc[0]
+
+    numer = 2 * len(x & y)
+    denom = len(x) + len(y)
+    return numer/denom
