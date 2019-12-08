@@ -48,15 +48,31 @@ def standardize_text(df, col_name, replace=True):
 
 
 def dice_coeff(x, y):
-    """Computes the Dice coefficient for similarity of two sets
-
-    x, y -- can be sets or lists
-
-    Returns boolean value True or False
-    """
-    x = x.iloc[0]
-    y = y.iloc[0]
+    """Computes the Dice coefficient for similarity of two sets"""
+    x = set(x.iloc[0])
+    y = set(y.iloc[0])
 
     numer = 2 * len(x & y)
     denom = len(x) + len(y)
     return numer/denom
+
+
+def jaccard_coeff(x, y):
+    """Computes the Jaccard coefficient for similarity of two sets"""
+    x = set(x.iloc[0])
+    y = set(y.iloc[0])
+
+    numer = len(x & y)
+    denom = len(x) + len(y)
+    return numer/denom
+
+
+def custom_coeff(x, y):
+    """Computes the custom similarity coefficient of two sets"""
+    x = set(x.iloc[0])
+    y = set(y.iloc[0])
+
+    numer = len(x & y)*1.5
+    denom = len(x) + len(y)
+    return numer/denom
+
