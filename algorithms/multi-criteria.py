@@ -26,7 +26,10 @@ def main():
     data = pd.read_csv(DATA_FILE)
 
     # normalize and standardize values
+    data = utils.normalize(data, 'geek_rating')
     data = utils.normalize(data, 'avg_rating')
+    data = utils.normalize(data, 'weight')
+    data = utils.normalize(data, 'age')
     data = utils.standardize_text(data, 'category')
     data = utils.standardize_text(data, 'mechanic')
     data = utils.standardize_text(data, 'designer')
@@ -35,7 +38,9 @@ def main():
     # each game has unique game_id
 
     # Text based: category, mechanic, designer
-    # Number based:
+    # Number based: geek_rating, age, weight
+    # Create vector v with attributes above:
+    # v(geek_rating, category, mechanic, age, weight)
 
     sorted_coeffs, coeffs = find_similar_text(data, int(argv[1]), 'category')
     ids = coeffs[sorted_coeffs[0]]

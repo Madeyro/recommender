@@ -29,11 +29,9 @@ def main():
     plot_corr(data, 'geek_rating', 'num_votes', 'geek_rating-to-num_votes')
     plot_corr(data, 'geek_rating', 'owned', 'geek_rating-to-owned')
 
-    return
-
     # save basic statistics
     cols = ['avg_rating', 'geek_rating', 'num_votes', 'owned', 'min_players',
-            'max_players', 'avg_time', 'min_time', 'max_time']
+            'max_players', 'avg_time', 'min_time', 'max_time', 'age', 'weight']
 
     data[cols].describe() \
               .transpose() \
