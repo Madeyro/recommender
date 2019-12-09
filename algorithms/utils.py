@@ -75,4 +75,3 @@ def custom_coeff(x, y):
     numer = len(x & y)*1.5
     denom = len(x) + len(y)
     return numer/denom
-

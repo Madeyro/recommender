@@ -9,7 +9,7 @@ for those games, which have small no ratings, or small amount of them.
 of key words separately.
 
 3) Create vector v with attributes:
-(geek_rating, category, mechanic, designer, weight)
+(category, mechanic, designer, weight)
 """
 
 import utils
@@ -59,9 +59,9 @@ def find_similar_text(data, game_id, col_name):
     for row in data.itertuples():
         if row.game_id == game_id:
             continue
-        coeff = get_coeff(data, row.game_id, game_id, col_name)
+        coeff = get_coeff(data, row.game_id, game_id, col_name, 'jaccard_coeff')
         if coeff in coeffs.keys():
-            if isinstance(coeffs[coeff]) == list:
+            if isinstance(coeffs[coeff], list):
                 coeffs[coeff].append(row.game_id)
             else:
                 ids = [coeffs[coeff]]
