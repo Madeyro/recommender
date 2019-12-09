@@ -4,7 +4,7 @@ import os.path
 import pickle
 import pandas as pd
 import utils
-from multiprocessing import Process
+import multiprocessing as mp
 from vector_builder import build_vectors
 from weighted_sum import recommend_similar as similar_weighted
 
@@ -46,11 +46,10 @@ def main():
              [6*subset+1, 7*subset],
              [7*subset+1, len(data)]]
 
-    for i in range(workers):
-        p = Process(target=compute_matrix,
-                    args=(data, parts[i][0], parts[i][1]))
-        p.start()
-        p.join()
+    pool = mp.Pool(workers)
+    pool.starmap(compute_matrix,
+                 [(data, bound[0], bound[1]) for bound in parts])
+    pool.close()
 
 
 def compute_matrix(data, start, end):
