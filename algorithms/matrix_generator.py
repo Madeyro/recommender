@@ -4,7 +4,7 @@ import os.path
 import pickle
 import pandas as pd
 import utils
-from multiprocessing import Process
+import multiprocessing as mp
 from vector_builder import build_vectors
 from weighted_sum import recommend_similar as similar_weighted
 
@@ -34,23 +34,24 @@ def main():
 
         data.to_csv('normalized_data.csv')
 
-    workers = 8
-    subset = int(len(data)/workers)
-    print("Dividing work into 8 parts")
-    parts = [[0, subset],
-             [subset+1, 2*subset],
-             [2*subset+1, 3*subset],
-             [3*subset+1, 4*subset],
-             [4*subset+1, 5*subset],
-             [5*subset+1, 6*subset],
-             [6*subset+1, 7*subset],
-             [7*subset+1, len(data)]]
+    compute_matrix(data, 0, len(data))
 
-    for i in range(workers):
-        p = Process(target=compute_matrix,
-                    args=(data, parts[i][0], parts[i][1]))
-        p.start()
-        p.join()
+    # workers = 8
+    # subset = int(len(data)/workers)
+    # print("Dividing work into 8 parts")
+    # parts = [[0, subset],
+    #          [subset+1, 2*subset],
+    #          [2*subset+1, 3*subset],
+    #          [3*subset+1, 4*subset],
+    #          [4*subset+1, 5*subset],
+    #          [5*subset+1, 6*subset],
+    #          [6*subset+1, 7*subset],
+    #          [7*subset+1, len(data)]]
+
+    # pool = mp.Pool(workers)
+    # pool.starmap(compute_matrix,
+    #              [(data, bound[0], bound[1]) for bound in parts])
+    # pool.close()
 
 
 def compute_matrix(data, start, end):
@@ -70,30 +71,23 @@ def compute_matrix(data, start, end):
                 pickle.dump(vectors, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
         print("Computing unweighted sum matrix")
-        uw_matrix[row.game_id] = similar_weighted(row.game_id, vectors,
-                                                  data.names.to_list())
+        ids = similar_weighted(row.game_id, vectors,
+                               data.game_id.to_list())
+        uw_matrix[row.game_id] = ids
 
         print("Computing weighted sum matrix")
-        w_matrix[row.game_id] = similar_weighted(row.game_id, vectors,
-                                                 data.names.to_list(),
-                                                 weights=[0.5, 0.5, 0.2, 0.1])
+        ids = similar_weighted(row.game_id, vectors,
+                               data.names.to_list(),
+                               weights=[0.5, 0.5, 0.2, 0.1])
+        w_matrix[row.game_id] = ids
 
-    if os.path.isfile('uw_matrix.pickle'):
-        with open('uw_matrix.pickle', 'rb') as handle:
-            uw_matrix = pickle.load(handle)
-    else:
+    if not os.path.isfile('uw_matrix.pickle'):
         with open('uw_matrix.pickle', 'wb') as handle:
             pickle.dump(w_matrix, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-    if os.path.isfile('w_matrix.pickle'):
-        with open('w_matrix.pickle', 'rb') as handle:
-            w_matrix = pickle.load(handle)
-    else:
+    if not os.path.isfile('w_matrix.pickle'):
         with open('w_matrix.pickle', 'wb') as handle:
             pickle.dump(w_matrix, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
-    for k in w_matrix.keys():
-        print(w_matrix[k].iloc[0].sort_values())
 
     return uw_matrix, w_matrix
 

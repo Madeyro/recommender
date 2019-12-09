@@ -5,7 +5,6 @@ Recommender algorithm
 Weight sum of similarity vector
 """
 
-import pandas as pd
 
 WEIGHTS = [1, 1, 1, 1]
 
@@ -14,7 +13,7 @@ WEIGHTS = [1, 1, 1, 1]
 # owned, category, designer, weight
 
 
-def recommend_similar(game_id, vectors, names, weights=None):
+def recommend_similar(game_id, vectors, names, weights=None, count=20):
     """Recommend similar items to one that is provided as 1st argument
 
     weights is ordered list of weights given to each component in vector.
@@ -23,15 +22,23 @@ def recommend_similar(game_id, vectors, names, weights=None):
     if weights is None:
         weights = WEIGHTS
 
-    series = []
+    coeffs = {}
     for key in vectors.keys():
         if key == game_id:
-            series.append(None)
+            coeffs[key] = None
         else:
-            series.append(weighted_sum(vectors[key], weights))
+            coeffs[key] = weighted_sum(vectors[key], weights)
 
-    return pd.DataFrame.from_dict({game_id: series}, orient='index',
-                                  columns=names)
+    keys = sorted(coeffs.keys(), reverse=True)
+
+    cnt = 0
+    res = []
+    for k in keys:
+        res.append(coeffs[key])
+        cnt += 1
+        if cnt == count:
+            break
+    return res
 
 
 def weighted_sum(vector, weights):
