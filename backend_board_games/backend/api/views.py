@@ -5,7 +5,8 @@ from rest_framework.response import Response
 import random
 import csv
 import pandas
-
+from six.moves import cPickle as pickle
+import numpy as np
 
 def parse_data():
     DATA_SRC = '/Users/darigummy/Desktop/board-game-data/bgg_db_1806.csv'
@@ -62,12 +63,31 @@ def parse_games():
         game.weight = row["weight"]
         game.save()
 
+
+def read_matrices():
+    objects = []
+    with (open("/Users/darigummy/Downloads/matrices/uw_matrix.pickle", "rb")) as openfile:
+        while True:
+            try:
+                objects.append(pickle.load(openfile))
+                # objects = pickle.load(openfile)
+            except EOFError:
+                break
+        with open("/Users/darigummy/Downloads/matrices/uw_matrix.txt", "w") as file:
+            # writer = csv.writer(f, delimiter=';')
+            # for line in objects:
+            #     writer.writerow(line)
+            for line in objects:
+                file.write(str(line))
+
+
 @api_view(['GET'])
 def ten_random_games(request):
     # parse_data()
+    read_matrices()
     if request.method == 'GET':
         games = GameShort.objects.all()
-        random_games = random.sample(list(games), 10)
+        random_games = random.sample(list(games), 12)
         serializer = GameShortSerializer(random_games, many=True)
         return Response(serializer.data)
 
@@ -77,7 +97,7 @@ def ten_random_games_full(request):
     # parse_games()
     if request.method == 'GET':
         games = Game.objects.all()
-        random_games = random.sample(list(games), 10)
+        random_games = random.sample(list(games), 12)
         serializer = GameSerializer(random_games, many=True)
         return Response(serializer.data)
 
