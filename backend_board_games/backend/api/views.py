@@ -69,8 +69,9 @@ def read_matrices():
     with (open("/Users/darigummy/Downloads/matrices/uw_matrix.pickle", "rb")) as openfile:
         while True:
             try:
-                objects.append(pickle.load(openfile))
-                # objects = pickle.load(openfile)
+                # objects.append(pickle.load(openfile))
+                objects = pickle.load(openfile)
+                print(objects[1])
             except EOFError:
                 break
         with open("/Users/darigummy/Downloads/matrices/uw_matrix.txt", "w") as file:
@@ -84,10 +85,10 @@ def read_matrices():
 @api_view(['GET'])
 def ten_random_games(request):
     # parse_data()
-    read_matrices()
+    # read_matrices()
     if request.method == 'GET':
         games = GameShort.objects.all()
-        random_games = random.sample(list(games), 12)
+        random_games = random.sample(list(games), 10)
         serializer = GameShortSerializer(random_games, many=True)
         return Response(serializer.data)
 
@@ -97,7 +98,17 @@ def ten_random_games_full(request):
     # parse_games()
     if request.method == 'GET':
         games = Game.objects.all()
-        random_games = random.sample(list(games), 12)
+        random_games = random.sample(list(games), 10)
         serializer = GameSerializer(random_games, many=True)
         return Response(serializer.data)
 
+
+@api_view(['GET'])
+def game_detail(request, pk):
+    try:
+        game = Game.objects.get(rank=pk)
+    except Game.DoesNotExist as error:
+        return Response({"error": str(error)})
+    if request.method == 'GET':
+        serializer = GameSerializer(game)
+        return Response(serializer.data)
