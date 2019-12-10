@@ -62,6 +62,15 @@ CORS_ORIGIN_WHITELIST = [
     'http://localhost:3000',
 ]
 
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+
 CORS_ORIGIN_REGEX_WHITELIST = [
     'http://localhost:3000',
 ]

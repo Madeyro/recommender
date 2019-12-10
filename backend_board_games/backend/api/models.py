@@ -36,6 +36,7 @@ class GameShort(models.Model):
         verbose_name = 'Game Short'
         verbose_name_plural = 'Games Short'
 
+    rank = models.PositiveIntegerField(default=0)
     name = models.CharField(max_length=200, blank=False, null=True)
     image_url = models.CharField(max_length=200, blank=True, null=True)
 

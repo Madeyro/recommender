@@ -15,6 +15,9 @@ def parse_data():
         next(reader)
         for row in reader:
             _, new_game = GameShort.objects.get_or_create(
+                rank=row[0],
+                # bgg_url=row[1],
+                # game_id=row[2],
                 name=row[3],
                 # min_players=row[4],
                 # max_players=row[5],
@@ -66,20 +69,36 @@ def parse_games():
 
 def read_matrices():
     objects = []
-    with (open("/Users/darigummy/Downloads/matrices/uw_matrix.pickle", "rb")) as openfile:
-        while True:
-            try:
-                # objects.append(pickle.load(openfile))
-                objects = pickle.load(openfile)
-                print(objects[1])
-            except EOFError:
-                break
-        with open("/Users/darigummy/Downloads/matrices/uw_matrix.txt", "w") as file:
+    # with (open("/Users/darigummy/Downloads/matrices/uw_matrix.pickle", "rb")) as openfile:
+    #     while True:
+    #         try:
+    #             # objects.append(pickle.load(openfile))
+    #             objects = pickle.load(openfile)
+    #             # print(pickle.load(openfile))
+    #             print(objects[1])
+    #
+    #         except EOFError:
+    #             break
+    #         openfile.close()
+    infile = open("/Users/darigummy/Downloads/matrices/uw_matrix.pickle", "rb")
+    data = pickle.load(infile, encoding='latin1')
+    infile.close()
+    # print(dict)
+    print('Showing the pickled data:')
+
+    cnt = 0
+    with open("/Users/darigummy/Downloads/matrices/uw_matrix.txt", "w") as file:
+        for key, value in data.items():
+            line = 'The game ' + str(cnt) + ' is ' + str(key) + ' similar games are ' + str(value)
+            print('The game ', cnt, ' is ', key, 'similar games are ', value)
+            cnt += 1
+            file.write(line)
             # writer = csv.writer(f, delimiter=';')
             # for line in objects:
             #     writer.writerow(line)
-            for line in objects:
-                file.write(str(line))
+            # for line in objects:
+            #     # print(line)
+            #     file.write("____" + str(line))
 
 
 @api_view(['GET'])
