@@ -1,12 +1,14 @@
 from rest_framework.decorators import api_view
-from .models import Game, GameShort
-from .serializers import GameSerializer, GameShortSerializer
+from .models import Game, GameShort, SimilarGame, SimilarGameConnection, SimilarGameConnectionWeighted
+from .serializers import GameSerializer, GameShortSerializer, SimilarGameSerializer, SimilarGameConnectionSerializer
 from rest_framework.response import Response
 import random
 import csv
 import pandas
 from six.moves import cPickle as pickle
 import numpy as np
+from itertools import chain
+import re
 
 def parse_data():
     DATA_SRC = '/Users/darigummy/Desktop/board-game-data/bgg_db_1806.csv'
@@ -80,30 +82,61 @@ def read_matrices():
     #         except EOFError:
     #             break
     #         openfile.close()
-    infile = open("/Users/darigummy/Downloads/matrices/uw_matrix.pickle", "rb")
+    infile = open("/Users/darigummy/Downloads/matrices-3/uw_matrix.pickle", "rb")
     data = pickle.load(infile, encoding='latin1')
     infile.close()
-    # print(dict)
     print('Showing the pickled data:')
-
-    cnt = 0
     with open("/Users/darigummy/Downloads/matrices/uw_matrix.txt", "w") as file:
         for key, value in data.items():
-            line = 'The game ' + str(cnt) + ' is ' + str(key) + ' similar games are ' + str(value)
-            print('The game ', cnt, ' is ', key, 'similar games are ', value)
-            cnt += 1
+            line = 'The game ' + str(key) + ' similar games are ' + str(value)
+            # similar_game = SimilarGame()
+            # similar_game.game = key
+            # similar_game.rank = value
+            # similar_game.save()
+            # file.write(line)
+            connection = SimilarGameConnection()
+            connection.game_rank = key
+            connection.similar_games_rank = value
+            connection.save()
             file.write(line)
-            # writer = csv.writer(f, delimiter=';')
-            # for line in objects:
-            #     writer.writerow(line)
-            # for line in objects:
-            #     # print(line)
-            #     file.write("____" + str(line))
+
+
+def read_matrices_weighted():
+    objects = []
+    # with (open("/Users/darigummy/Downloads/matrices/uw_matrix.pickle", "rb")) as openfile:
+    #     while True:
+    #         try:
+    #             # objects.append(pickle.load(openfile))
+    #             objects = pickle.load(openfile)
+    #             # print(pickle.load(openfile))
+    #             print(objects[1])
+    #
+    #         except EOFError:
+    #             break
+    #         openfile.close()
+    infile = open("/Users/darigummy/Downloads/matrices-3/w_matrix.pickle", "rb")
+    data = pickle.load(infile, encoding='latin1')
+    infile.close()
+    print('Showing the pickled data:')
+    with open("/Users/darigummy/Downloads/matrices/w_matrix.txt", "w") as file:
+        for key, value in data.items():
+            line = 'The game ' + str(key) + ' similar games are ' + str(value)
+            # similar_game = SimilarGame()
+            # similar_game.game = key
+            # similar_game.rank = value
+            # similar_game.save()
+            # file.write(line)
+            connection = SimilarGameConnectionWeighted()
+            connection.game_rank = key
+            connection.similar_games_rank = value
+            connection.save()
+            file.write(line)
 
 
 @api_view(['GET'])
 def ten_random_games(request):
     # parse_data()
+    # read_matrices_weighted()
     # read_matrices()
     if request.method == 'GET':
         games = GameShort.objects.all()
@@ -126,8 +159,43 @@ def ten_random_games_full(request):
 def game_detail(request, pk):
     try:
         game = Game.objects.get(rank=pk)
+        game_rank = SimilarGameConnection(game_rank=pk)
     except Game.DoesNotExist as error:
         return Response({"error": str(error)})
+    except SimilarGameConnection.DoesNotExist as error:
+        return Response({"error": str(error)})
     if request.method == 'GET':
-        serializer = GameSerializer(game)
-        return Response(serializer.data)
+        random_games = Game.objects.all()
+        random_games_ten_1 = random.sample(list(random_games), 6)
+
+        similar_games_unweighted = SimilarGameConnection.objects.filter(game_rank=pk).values_list(
+            'similar_games_rank', flat=True)
+        result_ranks_unweighted = []
+        for value in similar_games_unweighted:
+            ranks = value[1:len(value)-1]
+            # res = [int(i) for i in test_string.split() if i.isdigit()]
+            result_ranks_unweighted = re.findall(r'\b\d+\b', ranks)
+        # print(result_ranks_unweighted)
+        result_array_unweighted = []
+        for result_rank in result_ranks_unweighted:
+            result_array_unweighted.append(Game.objects.get(rank=result_rank))
+        # print(result_array_unweighted)
+
+        similar_games_ten_weighted = SimilarGameConnectionWeighted.objects.filter(game_rank=pk).values_list(
+            'similar_games_rank', flat=True)
+        result_ranks_weighted = []
+        for value in similar_games_ten_weighted:
+            ranks_weighted = value[1:len(value) - 1]
+            result_ranks_weighted = re.findall(r'\b\d+\b', ranks_weighted)
+        # print(result_ranks_weighted)
+        result_array_weighted = []
+        for result_ranks_weighted in result_ranks_weighted:
+            result_array_weighted.append(Game.objects.get(rank=result_ranks_weighted))
+        # print(result_array_weighted)
+
+        game_serializer = GameSerializer(game)
+        games_serializer_1 = GameSerializer(random_games_ten_1, many=True)
+        games_serializer_2 = GameSerializer(result_array_unweighted[0:6], many=True)
+        games_serializer_3 = GameSerializer(result_array_weighted[6:12], many=True)
+        return Response({'game_detail': game_serializer.data, 'random_games_1': games_serializer_1.data,
+                         'result_array_unweighted': games_serializer_2.data, 'result_array_weighted': games_serializer_3.data})

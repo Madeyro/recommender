@@ -42,3 +42,38 @@ class GameShort(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class SimilarGame(models.Model):
+    class Meta:
+        verbose_name = 'Similar Game'
+        verbose_name_plural = 'Similar Games'
+
+    game = models.ForeignKey(Game, on_delete=models.CASCADE, related_name='games')
+    ranks = models.PositiveIntegerField(default=0)
+
+
+class SimilarGameConnection(models.Model):
+    class Meta:
+        verbose_name = 'Connection Unweighted'
+        verbose_name_plural = 'Connections Unweighted'
+
+    game_rank = models.IntegerField(default=0)
+    similar_games_rank = models.CharField(max_length=500, blank=True, null=True)
+    # similar_games_rank = models.IntegerField(default=0)
+
+    def __str__(self):
+        return str(self.game_rank)
+
+
+class SimilarGameConnectionWeighted(models.Model):
+    class Meta:
+        verbose_name = 'Connection Weighted'
+        verbose_name_plural = 'Connections Weighted'
+
+    game_rank = models.IntegerField(default=0)
+    similar_games_rank = models.CharField(max_length=500, blank=True, null=True)
+    # similar_games_rank = models.IntegerField(default=0)
+
+    def __str__(self):
+        return str(self.game_rank)
