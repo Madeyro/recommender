@@ -34,7 +34,16 @@ def main():
 
         data.to_csv('normalized_data.csv')
 
+    # with open('uw_matrix.pickle', 'rb') as handle:
+    #     u = pickle.load(handle)
+
+    # with open('w_matrix.pickle', 'rb') as handle:
+    #     w = pickle.load(handle)
+
+    # print(w[174430])
+
     compute_matrix(data, 0, len(data))
+
 
     # workers = 8
     # subset = int(len(data)/workers)
@@ -71,15 +80,15 @@ def compute_matrix(data, start, end):
                 pickle.dump(vectors, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
         print("Computing unweighted sum matrix")
-        ids = similar_weighted(row.game_id, vectors,
+        ids = similar_weighted(data, row, vectors,
                                data.game_id.to_list())
-        uw_matrix[row.game_id] = ids
+        uw_matrix[row['rank']] = ids
 
         print("Computing weighted sum matrix")
-        ids = similar_weighted(row.game_id, vectors,
+        ids = similar_weighted(data, row, vectors,
                                data.names.to_list(),
                                weights=[0.5, 0.5, 0.2, 0.1])
-        w_matrix[row.game_id] = ids
+        w_matrix[row['rank']] = ids
 
     if not os.path.isfile('uw_matrix.pickle'):
         with open('uw_matrix.pickle', 'wb') as handle:

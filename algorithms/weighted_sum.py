@@ -13,7 +13,7 @@ WEIGHTS = [1, 1, 1, 1]
 # owned, category, designer, weight
 
 
-def recommend_similar(game_id, vectors, names, weights=None, count=20):
+def recommend_similar(data, row, vectors, names, weights=None, count=20):
     """Recommend similar items to one that is provided as 1st argument
 
     weights is ordered list of weights given to each component in vector.
@@ -24,24 +24,27 @@ def recommend_similar(game_id, vectors, names, weights=None, count=20):
 
     coeffs = {}
     for key in vectors.keys():
-        if key == game_id:
-            coeffs[key] = None
-        else:
-            coeffs[key] = weighted_sum(vectors[key], weights)
+        if key == row.game_id:
+            continue
+        coeffs[weighted_sum(vectors[key], weights)] = key
 
-    keys = sorted(coeffs.keys(), reverse=True)
-
-    cnt = 0
-    res = []
-    for k in keys:
-        res.append(coeffs[key])
-        cnt += 1
-        if cnt == count:
-            break
-    return res
+    return sort_dict_values(coeffs)
 
 
 def weighted_sum(vector, weights):
     """Computes weighted sum of componentes of given network and its weights"""
     # v(category, mechanic, designer, weight)
     return sum(i*j for i, j in zip(vector, weights))
+
+
+def sort_dict_values(coeffs):
+    srted_keys = sorted(coeffs.keys(), reverse=True)
+
+    cnt = 0
+    srted = []
+    for c, k in zip(coeffs.items(), srted_keys):
+        srted.append(coeffs[k])
+        cnt += 1
+        if cnt == 20:
+            break
+    return srted
