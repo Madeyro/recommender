@@ -67,7 +67,7 @@ def compute_matrix(data, start, end):
     w_matrix = {}
     uw_matrix = {}
 
-    for i in range(start, end+1):
+    for i in range(start, end):
         row = data.loc[i]
         print(row.names)
         print("Computing similarity vectors")
