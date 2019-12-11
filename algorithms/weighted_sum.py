@@ -26,9 +26,13 @@ def recommend_similar(data, row, vectors, names, weights=None, count=20):
     for key in vectors.keys():
         if key == row.game_id:
             continue
-        coeffs[weighted_sum(vectors[key], weights)] = key
+        similar_coeff = weighted_sum(vectors[key], weights)
+        if similar_coeff in coeffs.keys():
+            coeffs[similar_coeff].append(key)
+        else:
+            coeffs[similar_coeff] = [key]
 
-    return sort_dict_values(coeffs)
+    return sort_dict_values(data, coeffs)
 
 
 def weighted_sum(vector, weights):
@@ -37,14 +41,17 @@ def weighted_sum(vector, weights):
     return sum(i*j for i, j in zip(vector, weights))
 
 
-def sort_dict_values(coeffs):
+def sort_dict_values(data, coeffs):
     srted_keys = sorted(coeffs.keys(), reverse=True)
 
-    cnt = 0
     srted = []
     for c, k in zip(coeffs.items(), srted_keys):
-        srted.append(coeffs[k])
-        cnt += 1
-        if cnt == 20:
+        rank = []
+        for item in coeffs[k]:
+            rank.append(data.ix[data['game_id'] == item]['rank'].values[0])
+
+        srted.append(rank)
+        if len(srted) >= 20:
             break
+
     return srted
