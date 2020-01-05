@@ -5,7 +5,6 @@ Recommender algorithm
 Weight sum of similarity vector
 """
 
-import pandas as pd
 
 WEIGHTS = [1, 1, 1, 1]
 
@@ -14,7 +13,7 @@ WEIGHTS = [1, 1, 1, 1]
 # owned, category, designer, weight
 
 
-def recommend_similar(game_id, vectors, names, weights=None):
+def recommend_similar(data, row, vectors, names, weights=None, count=20):
     """Recommend similar items to one that is provided as 1st argument
 
     weights is ordered list of weights given to each component in vector.
@@ -23,18 +22,36 @@ def recommend_similar(game_id, vectors, names, weights=None):
     if weights is None:
         weights = WEIGHTS
 
-    series = []
+    coeffs = {}
     for key in vectors.keys():
-        if key == game_id:
-            series.append(None)
+        if key == row.game_id:
+            continue
+        similar_coeff = weighted_sum(vectors[key], weights)
+        if similar_coeff in coeffs.keys():
+            coeffs[similar_coeff].append(key)
         else:
-            series.append(weighted_sum(vectors[key], weights))
+            coeffs[similar_coeff] = [key]
 
-    return pd.DataFrame.from_dict({game_id: series}, orient='index',
-                                  columns=names)
+    return sort_dict_values(data, coeffs)
 
 
 def weighted_sum(vector, weights):
     """Computes weighted sum of componentes of given network and its weights"""
     # v(category, mechanic, designer, weight)
     return sum(i*j for i, j in zip(vector, weights))
+
+
+def sort_dict_values(data, coeffs):
+    srted_keys = sorted(coeffs.keys(), reverse=True)
+
+    srted = []
+    for c, k in zip(coeffs.items(), srted_keys):
+        rank = []
+        for item in coeffs[k]:
+            rank.append(data.ix[data['game_id'] == item]['rank'].values[0])
+
+        srted.append(rank)
+        if len(srted) >= 20:
+            break
+
+    return srted
