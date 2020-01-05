@@ -1,0 +1,20 @@
+.game-picker{
+  margin-bottom: 100px;
+  color: #D6D0BA;
+  text-align: center;
+  .ui.cards.center{
+    justify-content: center;
+  }
+  .ui.four.cards>.card {
+    width: calc(20% - 1.5em);
+    height: 220px;
+  }
+  .ui.card>.image, .ui.cards>.card>.image {
+    height: 200px;
+  }
+  .header{
+    padding-bottom: 30px;
+  }
+}
+
+

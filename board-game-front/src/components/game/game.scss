@@ -1,0 +1,15 @@
+.rating{
+  display: flex;
+}
+.icons {
+  margin-right: 10px;
+}
+.inline {
+  display: flex;
+  .ui.image {
+    margin-right:50px;
+  }
+  .ui.card:last-child {
+    height: 190px;
+  }
+}
