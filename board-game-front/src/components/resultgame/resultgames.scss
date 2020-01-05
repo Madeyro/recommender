@@ -1,0 +1,18 @@
+.game-line .ui.six.cards>.card {
+  height: 220px;
+}
+.game-line .ui.card>.image:not(.ui)>img, .ui.cards>.card>.image:not(.ui)>img {
+  height: 140px;
+}
+.game-line {
+  .header-line {
+    padding-top: 30px;
+  }
+}
+.game-line.ui.card>.content>.header:not(.ui), .ui.cards>.card>.content>.header:not(.ui) {
+    font-size: 1em;
+  }
+.ui.card {
+  margin: 0;
+}
+
